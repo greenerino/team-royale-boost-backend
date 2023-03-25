@@ -2,24 +2,45 @@ import { Room, Client } from "colyseus";
 import { MyRoomState, Player } from "./schema/MyRoomState";
 
 export class MyRoom extends Room<MyRoomState> {
+  fixedTimeStep = 1000 / 60
 
   onCreate (options: any) {
     this.setState(new MyRoomState());
 
     this.onMessage(0, (client, data) => {
       const player = this.state.players.get(client.sessionId)
-      const velocity = 2;
 
-      if (data.left) {
-        player.x -= velocity;
-      } else if (data.right) {
-        player.x += velocity;
+      player.inputQueue.push(data)
+    })
+
+    let elapsedTime = 0
+    this.setSimulationInterval((delta) => {
+      elapsedTime += delta
+      while (elapsedTime >= this.fixedTimeStep) {
+        elapsedTime -= this.fixedTimeStep
+        this.fixedTick(this.fixedTimeStep)
       }
+    })
+  }
 
-      if (data.up) {
-        player.y -= velocity;
-      } else if (data.down) {
-        player.y += velocity;
+  fixedTick(delta: number) {
+    const velocity = 2
+
+    this.state.players.forEach(player => {
+      let input: any
+
+      while (input = player.inputQueue.shift()) {
+        if (input.left) {
+            player.x -= velocity;
+        } else if (input.right) {
+            player.x += velocity;
+        }
+
+        if (input.up) {
+            player.y -= velocity;
+        } else if (input.down) {
+            player.y += velocity;
+        }
       }
     })
   }
