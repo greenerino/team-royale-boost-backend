@@ -1,5 +1,5 @@
 import { Room, Client } from "colyseus";
-import { MyRoomState, Player } from "./schema/MyRoomState";
+import { MyRoomState, Player, Projectile, Tuple } from "./schema/MyRoomState";
 
 export class MyRoom extends Room<MyRoomState> {
   fixedTimeStep = 1000 / 60
@@ -41,8 +41,27 @@ export class MyRoom extends Room<MyRoomState> {
         } else if (input.down) {
             player.position.y += velocity;
         }
+
+        if (input.shoot) {
+          this.shoot(player, input.shoot.x, input.shoot.y)
+        }
       }
     })
+  }
+
+  shoot(player: Player, x: number, y: number) {
+    const payload = {
+      playerId: player.client.sessionId,
+      position: {
+        x: player.position.x,
+        y: player.position.y,
+      },
+      velocity: {
+        x,
+        y,
+      },
+    }
+    this.broadcast('shoot', payload, { except: player.client })
   }
 
   onJoin (client: Client, options: any) {
@@ -54,6 +73,8 @@ export class MyRoom extends Room<MyRoomState> {
     const player = new Player()
     player.position.x = (Math.random() * playAreaWidth)
     player.position.y = (Math.random() * playAreaHeight)
+
+    player.client = client
 
     this.state.players.set(client.sessionId, player)
   }
