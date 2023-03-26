@@ -7,7 +7,7 @@ export class MyRoom extends Room<MyRoomState> {
   onCreate (options: any) {
     this.setState(new MyRoomState());
 
-    this.onMessage('move', (client, data) => {
+    this.onMessage('playerInput', (client, data) => {
       const player = this.state.players.get(client.sessionId)
 
       player.inputQueue.push(data)
@@ -31,15 +31,15 @@ export class MyRoom extends Room<MyRoomState> {
 
       while (input = player.inputQueue.shift()) {
         if (input.left) {
-            player.x -= velocity;
+            player.position.x -= velocity;
         } else if (input.right) {
-            player.x += velocity;
+            player.position.x += velocity;
         }
 
         if (input.up) {
-            player.y -= velocity;
+            player.position.y -= velocity;
         } else if (input.down) {
-            player.y += velocity;
+            player.position.y += velocity;
         }
       }
     })
@@ -52,8 +52,8 @@ export class MyRoom extends Room<MyRoomState> {
     const playAreaHeight = 600
 
     const player = new Player()
-    player.x = (Math.random() * playAreaWidth)
-    player.y = (Math.random() * playAreaHeight)
+    player.position.x = (Math.random() * playAreaWidth)
+    player.position.y = (Math.random() * playAreaHeight)
 
     this.state.players.set(client.sessionId, player)
   }
