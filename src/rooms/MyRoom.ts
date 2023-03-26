@@ -7,7 +7,7 @@ export class MyRoom extends Room<MyRoomState> {
   onCreate (options: any) {
     this.setState(new MyRoomState());
 
-    this.onMessage(0, (client, data) => {
+    this.onMessage('move', (client, data) => {
       const player = this.state.players.get(client.sessionId)
 
       player.inputQueue.push(data)
