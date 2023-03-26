@@ -42,7 +42,7 @@ export class MyRoom extends Room<MyRoomState> {
             player.position.y += velocity;
         }
 
-        if (input.shoot) {
+        if (input.shoot.active) {
           this.shoot(player, input.shoot.x, input.shoot.y)
         }
       }
