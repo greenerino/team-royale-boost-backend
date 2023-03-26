@@ -24,7 +24,7 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   fixedTick(delta: number) {
-    const velocity = 2
+    const velocity = 6
 
     this.state.players.forEach(player => {
       let input: any
