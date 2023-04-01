@@ -7,17 +7,12 @@ export class Tuple extends Schema {
   @type("number") y: number = 0;
 }
 
-export class Projectile extends Schema {
-  @type(Tuple) position: Tuple = new Tuple();
-  @type(Tuple) velocity: Tuple = new Tuple();
-}
-
 export class Player extends Schema {
   @type(Tuple) position: Tuple = new Tuple();
   inputQueue: any[] = [];
-  // @type([ Projectile ]) projectiles = new ArraySchema<Projectile>();
   client: Client;
   hitRegister: HitRegister
+  @type("number") health: number
 }
 
 export class MyRoomState extends Schema {

@@ -1,9 +1,10 @@
 import { Room, Client } from "colyseus";
 import { HitRegister } from "./schema/HitRegister";
-import { MyRoomState, Player, Projectile, Tuple } from "./schema/MyRoomState";
+import { MyRoomState, Player } from "./schema/MyRoomState";
 
 export class MyRoom extends Room<MyRoomState> {
   fixedTimeStep = 1000 / 60
+  projectileDamage = 8
 
   onCreate (options: any) {
     this.setState(new MyRoomState());
@@ -18,6 +19,7 @@ export class MyRoom extends Room<MyRoomState> {
       const { shooterId, victimId } = data
       const reporterId = reporterClient.sessionId
       const victim = this.state.players.get(victimId)
+      // TODO: move to fixedTick()
       victim.hitRegister.hit(shooterId, reporterId)
     })
 
@@ -70,10 +72,11 @@ export class MyRoom extends Room<MyRoomState> {
     const player = new Player()
     player.position.x = (Math.random() * playAreaWidth)
     player.position.y = (Math.random() * playAreaHeight)
+    player.health = 100
 
     player.client = client
     player.hitRegister = new HitRegister(player, 0, (shooterId: string) => {
-      console.log(`hit callback was called. Victim: ${client.sessionId} Shooter: ${shooterId}`)
+      player.health -= this.projectileDamage
     })
 
     this.state.players.set(client.sessionId, player)
@@ -92,7 +95,7 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   updateHitRegisterThresholds() {
-    const threshold = this.state.players.size / 2
+    const threshold = (this.state.players.size / 2) + 1
     this.state.players.forEach((player) => {
       player.hitRegister.setThreshold(threshold)
     })
