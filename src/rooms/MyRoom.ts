@@ -1,8 +1,10 @@
 import { Room, Client } from "colyseus";
-import { MyRoomState, Player, Projectile, Tuple } from "./schema/MyRoomState";
+import { HitRegister } from "./schema/HitRegister";
+import { MyRoomState, Player } from "./schema/MyRoomState";
 
 export class MyRoom extends Room<MyRoomState> {
   fixedTimeStep = 1000 / 60
+  projectileDamage = 8
 
   onCreate (options: any) {
     this.setState(new MyRoomState());
@@ -11,6 +13,14 @@ export class MyRoom extends Room<MyRoomState> {
       const player = this.state.players.get(client.sessionId)
 
       player.inputQueue.push(data)
+    })
+
+    this.onMessage('hit', (reporterClient, data) => {
+      const { shooterId, victimId } = data
+      const reporterId = reporterClient.sessionId
+      const victim = this.state.players.get(victimId)
+      // TODO: move to fixedTick()
+      victim.hitRegister.hit(shooterId, reporterId)
     })
 
     let elapsedTime = 0
@@ -63,21 +73,34 @@ export class MyRoom extends Room<MyRoomState> {
     const player = new Player()
     player.position.x = (Math.random() * playAreaWidth)
     player.position.y = (Math.random() * playAreaHeight)
+    player.health = 100
     player.spriteFrameKey = "adam_front.png"
 
     player.client = client
+    player.hitRegister = new HitRegister(player, 0, (shooterId: string) => {
+      player.health -= this.projectileDamage
+    })
 
     this.state.players.set(client.sessionId, player)
+    this.updateHitRegisterThresholds()
   }
 
   onLeave (client: Client, consented: boolean) {
     console.log(client.sessionId, "left!");
 
     this.state.players.delete(client.sessionId)
+    this.updateHitRegisterThresholds()
   }
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
+  }
+
+  updateHitRegisterThresholds() {
+    const threshold = (this.state.players.size / 2) + 1
+    this.state.players.forEach((player) => {
+      player.hitRegister.setThreshold(threshold)
+    })
   }
 
 }
