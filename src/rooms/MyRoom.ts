@@ -63,7 +63,6 @@ export class MyRoom extends Room<MyRoomState> {
 
   onJoin (client: Client, options: any) {
     console.log(client.sessionId, "joined!");
-    // TODO: update hitregister threshold
 
     const playAreaWidth = 800
     const playAreaHeight = 600
@@ -78,17 +77,25 @@ export class MyRoom extends Room<MyRoomState> {
     })
 
     this.state.players.set(client.sessionId, player)
+    this.updateHitRegisterThresholds()
   }
 
   onLeave (client: Client, consented: boolean) {
     console.log(client.sessionId, "left!");
-    // TODO: update hitregister threshold
 
     this.state.players.delete(client.sessionId)
+    this.updateHitRegisterThresholds()
   }
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
+  }
+
+  updateHitRegisterThresholds() {
+    const threshold = this.state.players.size / 2
+    this.state.players.forEach((player) => {
+      player.hitRegister.setThreshold(threshold)
+    })
   }
 
 }
