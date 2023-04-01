@@ -13,6 +13,7 @@ export class Projectile extends Schema {
 
 export class Player extends Schema {
   @type(Tuple) position: Tuple = new Tuple();
+  @type("string") spriteFrameKey: string = "";
   inputQueue: any[] = [];
   // @type([ Projectile ]) projectiles = new ArraySchema<Projectile>();
   client: Client;

@@ -30,6 +30,7 @@ export class MyRoom extends Room<MyRoomState> {
       while (input = player.inputQueue.shift()) {
         player.position.x = input.position.x
         player.position.y = input.position.y
+        player.spriteFrameKey = input.spriteFrameKey
 
         if (input.shoot.active) {
           this.shoot(player, input.shoot.x, input.shoot.y)
@@ -62,6 +63,7 @@ export class MyRoom extends Room<MyRoomState> {
     const player = new Player()
     player.position.x = (Math.random() * playAreaWidth)
     player.position.y = (Math.random() * playAreaHeight)
+    player.spriteFrameKey = "adam_front.png"
 
     player.client = client
 
