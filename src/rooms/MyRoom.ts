@@ -23,24 +23,13 @@ export class MyRoom extends Room<MyRoomState> {
     })
   }
 
-  fixedTick(delta: number) {
-    const velocity = 6
-
+  fixedTick(_delta: number) {
     this.state.players.forEach(player => {
       let input: any
 
       while (input = player.inputQueue.shift()) {
-        if (input.left) {
-            player.position.x -= velocity;
-        } else if (input.right) {
-            player.position.x += velocity;
-        }
-
-        if (input.up) {
-            player.position.y -= velocity;
-        } else if (input.down) {
-            player.position.y += velocity;
-        }
+        player.position.x = input.position.x
+        player.position.y = input.position.y
 
         if (input.shoot.active) {
           this.shoot(player, input.shoot.x, input.shoot.y)
