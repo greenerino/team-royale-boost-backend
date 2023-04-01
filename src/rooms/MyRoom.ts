@@ -5,6 +5,10 @@ import { MyRoomState, Player } from "./schema/MyRoomState";
 export class MyRoom extends Room<MyRoomState> {
   fixedTimeStep = 1000 / 60
   projectileDamage = 8
+  respawnTime = 3500
+  playAreaWidth = 1900
+  playAreaHeight = 1400
+
 
   onCreate (options: any) {
     this.setState(new MyRoomState());
@@ -67,18 +71,17 @@ export class MyRoom extends Room<MyRoomState> {
   onJoin (client: Client, options: any) {
     console.log(client.sessionId, "joined!");
 
-    const playAreaWidth = 800
-    const playAreaHeight = 600
-
     const player = new Player()
-    player.position.x = (Math.random() * playAreaWidth)
-    player.position.y = (Math.random() * playAreaHeight)
-    player.health = 100
-    player.spriteFrameKey = "adam_front.png"
+    this.spawn(player)
 
     player.client = client
     player.hitRegister = new HitRegister(player, 0, (shooterId: string) => {
       player.health -= this.projectileDamage
+      if (player.health <= 0) {
+        setTimeout(() => {
+          this.respawn(player)
+        }, this.respawnTime);
+      }
     })
 
     this.state.players.set(client.sessionId, player)
@@ -103,4 +106,19 @@ export class MyRoom extends Room<MyRoomState> {
     })
   }
 
+  spawn(player: Player): void {
+    player.position.x = (Math.random() * this.playAreaWidth)
+    player.position.y = (Math.random() * this.playAreaHeight)
+    player.health = 100
+    player.spriteFrameKey = "adam_front.png"
+  }
+
+  respawn(player: Player) {
+    this.spawn(player)
+    this.broadcast('respawn', {
+      id: player.client.sessionId,
+      x: player.position.x,
+      y: player.position.y
+    })
+  }
 }
