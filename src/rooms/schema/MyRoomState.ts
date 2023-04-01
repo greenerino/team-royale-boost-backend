@@ -9,6 +9,7 @@ export class Tuple extends Schema {
 
 export class Player extends Schema {
   @type(Tuple) position: Tuple = new Tuple();
+  @type("string") spriteFrameKey: string = "";
   inputQueue: any[] = [];
   client: Client;
   hitRegister: HitRegister
