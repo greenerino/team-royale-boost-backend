@@ -1,4 +1,5 @@
 import { Room, Client } from "colyseus";
+import { HitRegister } from "./schema/HitRegister";
 import { MyRoomState, Player, Projectile, Tuple } from "./schema/MyRoomState";
 
 export class MyRoom extends Room<MyRoomState> {
@@ -11,6 +12,13 @@ export class MyRoom extends Room<MyRoomState> {
       const player = this.state.players.get(client.sessionId)
 
       player.inputQueue.push(data)
+    })
+
+    this.onMessage('hit', (reporterClient, data) => {
+      const { shooterId, victimId } = data
+      const reporterId = reporterClient.sessionId
+      const victim = this.state.players.get(victimId)
+      victim.hitRegister.hit(shooterId, reporterId)
     })
 
     let elapsedTime = 0
@@ -55,6 +63,7 @@ export class MyRoom extends Room<MyRoomState> {
 
   onJoin (client: Client, options: any) {
     console.log(client.sessionId, "joined!");
+    // TODO: update hitregister threshold
 
     const playAreaWidth = 800
     const playAreaHeight = 600
@@ -64,12 +73,16 @@ export class MyRoom extends Room<MyRoomState> {
     player.position.y = (Math.random() * playAreaHeight)
 
     player.client = client
+    player.hitRegister = new HitRegister(player, 0, (shooterId: string) => {
+      console.log(`hit callback was called. Victim: ${client.sessionId} Shooter: ${shooterId}`)
+    })
 
     this.state.players.set(client.sessionId, player)
   }
 
   onLeave (client: Client, consented: boolean) {
     console.log(client.sessionId, "left!");
+    // TODO: update hitregister threshold
 
     this.state.players.delete(client.sessionId)
   }

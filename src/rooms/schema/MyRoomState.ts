@@ -1,5 +1,6 @@
 import { MapSchema, Schema, ArraySchema, type } from "@colyseus/schema";
 import { Client } from "colyseus";
+import { HitRegister } from "./HitRegister";
 
 export class Tuple extends Schema {
   @type("number") x: number = 0;
@@ -16,6 +17,7 @@ export class Player extends Schema {
   inputQueue: any[] = [];
   // @type([ Projectile ]) projectiles = new ArraySchema<Projectile>();
   client: Client;
+  hitRegister: HitRegister
 }
 
 export class MyRoomState extends Schema {
